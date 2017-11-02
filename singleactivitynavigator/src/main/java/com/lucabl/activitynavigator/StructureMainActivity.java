@@ -2,7 +2,6 @@ package com.lucabl.activitynavigator;
 
 import android.animation.ValueAnimator;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -10,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.MenuItem;
@@ -81,7 +79,7 @@ public class StructureMainActivity extends AppCompatActivity
     protected void setHomeFragment(StructureFragmentFactory factory) {
         navFactories.put(HOME_FRAGMENT_NAVID, factory);
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, factory.getFragment()).commit();
+                .add(R.id.fragment_container, factory.getFragment(new Bundle())).commit();
     }
 
     @Override
@@ -97,7 +95,7 @@ public class StructureMainActivity extends AppCompatActivity
                     MenuItem item = navigationView.getMenu().findItem(frag.navId);
                     if(item!=null) item.setChecked(false);
 
-                    changePage(parentNavId, frag.backArguments);
+                    changePage(parentNavId, frag.backArguments!=null ? frag.backArguments : new Bundle());
                 }
                 else super.onBackPressed();
             }
@@ -129,32 +127,29 @@ public class StructureMainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        changePage(item.getItemId());
+        changePage(item.getItemId(), new Bundle());
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    StructureFragment.NotifyTitlesUpdateCallback titlesUpdateCallback = new StructureFragment.NotifyTitlesUpdateCallback() {
+    StructureFragment.MainActivityCallback mainActivityCallback = new StructureFragment.MainActivityCallback() {
         @Override
         public void notifyTitlesUpdate() {
             updateTitles();
         }
-    };
 
-    public void changePage(int id, Parcelable... args) {
-        Bundle bundle = new Bundle();
-        for (int i = 0; i < args.length; i++) {
-            bundle.putParcelable(""+i, args[i]);
+        @Override
+        public void requestPageChange(int id, Bundle bundle) {
+            changePage(id, bundle);
         }
-        changePage(id, bundle);
-    }
+    };
 
     public void changePage(int id, Bundle bundle) {
 
         if(id == HOME_FRAGMENT_NAVID) {
             StructureFragment frag = navFactories.get(HOME_FRAGMENT_NAVID).getFragment(bundle);
-            frag.notifyTitlesUpdateCallback = titlesUpdateCallback;
+            frag.mainActivityCallback = mainActivityCallback;
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, frag).commit();
 
@@ -174,7 +169,7 @@ public class StructureMainActivity extends AppCompatActivity
                     found = true;
                     StructureFragment frag = navFactories.valueAt(i).getFragment(bundle);
                     frag.navId = navId;
-                    frag.notifyTitlesUpdateCallback = titlesUpdateCallback;
+                    frag.mainActivityCallback = mainActivityCallback;
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fragment_container, frag).commit();
 
@@ -197,7 +192,7 @@ public class StructureMainActivity extends AppCompatActivity
     }
 
     // call this method for animation between hamburger and arrow
-    protected void setHomeAsUp(boolean isHomeAsUp){
+    private void setHomeAsUp(boolean isHomeAsUp){
         if (this.isHomeAsUp != isHomeAsUp) {
             this.isHomeAsUp = isHomeAsUp;
 

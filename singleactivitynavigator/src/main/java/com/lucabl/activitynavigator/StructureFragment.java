@@ -2,7 +2,6 @@ package com.lucabl.activitynavigator;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 
 /**
@@ -13,14 +12,18 @@ public abstract class StructureFragment extends Fragment {
 
     Integer navId = null;
     Bundle backArguments = null;
-    NotifyTitlesUpdateCallback notifyTitlesUpdateCallback = null;
+    MainActivityCallback mainActivityCallback = null;
 
     public abstract String getTitle(Context context);
 
     public abstract String getSubtitle(Context context);
 
     protected void notifyTitlesUpdate() {
-        notifyTitlesUpdateCallback.notifyTitlesUpdate();
+        mainActivityCallback.notifyTitlesUpdate();
+    }
+
+    protected void changePage(int id, Bundle bundle) {
+        mainActivityCallback.requestPageChange(id, bundle);
     }
 
     /**
@@ -33,33 +36,34 @@ public abstract class StructureFragment extends Fragment {
     }
 
     /**
-     * Can be called by subclasses to set arguments to pass back to parent when user goes back
+     * Can be called by subclasses to get (and then set more inside) arguments to pass back to parent when user goes back
      *
-     * @param args arguments to set
+     * @return bundle of arguments
      */
-    protected void setBackArguments(Parcelable... args) {
-        backArguments = new Bundle();
-        for (int i = 0; i < args.length; i++) {
-            backArguments.putParcelable(""+i, args[i]);
-        }
+    protected Bundle getBackArguments() {
+        if(backArguments==null) backArguments = new Bundle();
+        return backArguments;
     }
 
     /**
      * Can be called by subclasses to get an argument passed to this fragment
      *
-     * @param index index of the wanted argument
+     * @param key key of the wanted argument
      * @return the wanted argument
      */
-    protected Parcelable getArgument(int index) {
-        Parcelable parc = null;
+    protected Object getArgument(String key) {
+        Object obj = null;
         Bundle bundle = getArguments();
         if(bundle!=null) {
-            parc = bundle.getParcelable(""+index);
+            obj = bundle.get(key);
         }
-        return parc;
+        return obj;
     }
 
-    public static abstract class NotifyTitlesUpdateCallback {
+    public static abstract class MainActivityCallback {
+
         public abstract void notifyTitlesUpdate();
+
+        public abstract void requestPageChange(int id, Bundle bundle);
     }
 }
