@@ -1,7 +1,6 @@
 package com.lucabl.singleactivitynavigatorsample;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.lucabl.activitynavigator.StructureFragment;
+import com.lucabl.singleactivitynavigator.StructureFragment;
 
 /**
  * Created by Luca on 19/10/2017.

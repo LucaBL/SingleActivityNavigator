@@ -1,4 +1,4 @@
-package com.lucabl.activitynavigator;
+package com.lucabl.singleactivitynavigator;
 
 import android.content.Context;
 import android.os.Bundle;
